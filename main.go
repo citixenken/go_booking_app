@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"strings"
+
+	"github.com/citixenken/go_booking_app/helper"
 )
 
 // package level variables
@@ -38,7 +39,7 @@ func main() {
 		firstName, lastName, userEmail, userTickets := getUserInputs()
 
 		// validate user input
-		isValidName, isValidEmail, isValidTicket := validateUserInput(firstName, lastName, userEmail, userTickets)
+		isValidName, isValidEmail, isValidTicket := helper.ValidateUserInput(firstName, lastName, userEmail, userTickets, remainingTickets)
 
 
 		if isValidName && isValidEmail &&isValidTicket {
@@ -101,14 +102,6 @@ func getUserInputs() (string, string, string, uint) {
 		fmt.Scan(&userTickets)
 
 		return firstName, lastName, userEmail, userTickets
-}
-
-func validateUserInput(firstName string, lastName string, userEmail string, userTickets uint) (bool, bool, bool){
-	isValidName := len(firstName) >= 2 && len(lastName) >= 2
-	isValidEmail := strings.Contains(userEmail, "@")
-	isValidTicket := userTickets > 0 && userTickets <= remainingTickets
-
-	return isValidName, isValidEmail, isValidTicket
 }
 
 func bookTicket(userTickets uint, firstName string, userEmail string)  {
