@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"sync"
+	"time"
 
 	"github.com/citixenken/go_booking_app/helper"
 )
@@ -20,6 +22,10 @@ type UserData struct {
 	noOfTickets uint
 }
 
+// tell main thread to wait on child threads to finish before exiting
+//WaitGroup => waits on launched goroutines to finish
+var wg = sync.WaitGroup{}
+
 func main() {
 	// fmt.Println("Hello, gopher!")
 	// fmt.Printf("Welcome to this year's %v\n", conferenceName)
@@ -34,8 +40,6 @@ func main() {
 	// bookings[1] = "John"
 	// bookings[2] = "Mary"
 
-	for {
-
 		// user input: (&) pointer => variable that points to the memory address of another variable
 		// fmt.Println(remainingTickets) //actual value
 		// fmt.Println(&remainingTickets) //memory location
@@ -49,38 +53,44 @@ func main() {
 
 		if isValidName && isValidEmail &&isValidTicket {
 
-			// book ticket
-			bookTicket(userTickets, firstName, userEmail)
+		// book ticket
+		bookTicket(userTickets, firstName, userEmail)
 
-			fmt.Printf("%v has booked %v slots for the %v event\n", firstName, userTickets, conferenceName)
-			fmt.Printf("You will receive a confirmation email at %v\n", userEmail)
-			fmt.Printf("Tickets remaining: %v\n", remainingTickets)
-			fmt.Printf("First booking value: %v\n", bookings[0])
-			fmt.Printf("Tickets booked so far: %v\n", bookings)
-			// fmt.Printf("Array Type: %T\n", bookings)
-			// fmt.Printf("Array Length: %v\n", len(bookings))
-			fmt.Printf("Slice Type: %T\n", bookings)
-			fmt.Printf("Slice Length: %v\n", len(bookings))
+		// simulate send ticket
+		// break sendTicket() away from main thread => goroutines + concurrency
+		// starts a new goroutine
+		wg.Add(1) //sets number of goroutines to wait for
+		go sendTicket(userTickets, firstName, userEmail)
 
-			if remainingTickets == 0 {
-				fmt.Println("Go Conference sold out! Come back next year.")
-				break
-			}
-		} else {
-			if !isValidName {
-				fmt.Println("First name or Last name is too short!")
-			}
-			if !isValidEmail {
-				fmt.Println("Email address missing @ sign!")
-			}
-			if !isValidTicket {
-				fmt.Println("Check your ticket input value!")
-			}
+		fmt.Printf("%v has booked %v slots for the %v event\n", firstName, userTickets, conferenceName)
+		fmt.Printf("You will receive a confirmation email at %v\n", userEmail)
+		fmt.Printf("Tickets remaining: %v\n", remainingTickets)
+		fmt.Printf("First booking value: %v\n", bookings[0])
+		fmt.Printf("Tickets booked so far: %v\n", bookings)
+		// fmt.Printf("Array Type: %T\n", bookings)
+		// fmt.Printf("Array Length: %v\n", len(bookings))
+		fmt.Printf("Slice Type: %T\n", bookings)
+		fmt.Printf("Slice Length: %v\n", len(bookings))
 
-			// fmt.Println("Invalid data input!")
-			fmt.Printf("We only have %v tickets remaining. Try again!\n", remainingTickets)
+		if remainingTickets == 0 {
+			fmt.Println("Go Conference sold out! Come back next year.")
+			// break
 		}
+	} else {
+		if !isValidName {
+			fmt.Println("First name or Last name is too short!")
+		}
+		if !isValidEmail {
+			fmt.Println("Email address missing @ sign!")
+		}
+		if !isValidTicket {
+			fmt.Println("Check your ticket input value!")
+		}
+
+		// fmt.Println("Invalid data input!")
+		fmt.Printf("We only have %v tickets remaining. Try again!\n", remainingTickets)
 	}
+	wg.Wait() //blocks until WaitGroup counter is 0
 }
 
 func onboardUsers() {
@@ -129,4 +139,18 @@ func bookTicket(userTickets uint, firstName string, userEmail string)  {
 	// bookings[0] = userName + " => " + userEmail //array
 	// bookings = append(bookings, firstName + " => " + userEmail) //slice: flexible and dynamic in nature
 	bookings = append(bookings, userData)
+}
+
+func sendTicket(userTickets uint, firstName string, userEmail string) {
+	// simulate concurrency
+	fmt.Println("Generating ticket...")
+	time.Sleep(10 * time.Second)
+
+	var ticket = fmt.Sprintf("%v tickets printed for %v\n", userTickets, firstName)
+	fmt.Println("#############################################")
+	fmt.Printf("Sending ticket:\n  %v to email address: %v\n", ticket,userEmail)
+	fmt.Println("#############################################")
+	// decrements WaitGroup counter by 1. Called by goroutine to indicate
+	//that its finished
+	wg.Done()
 }
