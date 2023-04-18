@@ -11,11 +11,16 @@ const conferenceTickets = 42
 var conferenceName = "Go Conference"
 // conferenceName := "Go Conference"
 var remainingTickets uint = 42
-var bookings []string //slice
+// var bookings = make([]map[string]string, 0) //empty slice of maps
+var bookings = make([]UserData, 0) //empty slice of struct
+
+type UserData struct {
+	firstName string
+	userEmail string
+	noOfTickets uint
+}
 
 func main() {
-
-
 	// fmt.Println("Hello, gopher!")
 	// fmt.Printf("Welcome to this year's %v\n", conferenceName)
 	// fmt.Println("Get your tickets here...")
@@ -107,7 +112,21 @@ func getUserInputs() (string, string, string, uint) {
 func bookTicket(userTickets uint, firstName string, userEmail string)  {
 	// next, reduce ticket number
 	remainingTickets -= userTickets
+
 	// bookings
+	// create a user map
+	// var userData = make(map[string]string)
+	// userData["firstName"] = firstName
+	// userData["userEmail"] = userEmail
+	// userData["userTickets"] = strconv.FormatUint(uint64(userTickets), 10)
+
+	var userData = UserData {
+		firstName: firstName,
+		userEmail: userEmail,
+		noOfTickets: userTickets,
+	}
+
 	// bookings[0] = userName + " => " + userEmail //array
-	bookings = append(bookings, firstName + " => " + userEmail) //slice: flexible and dynamic in nature
+	// bookings = append(bookings, firstName + " => " + userEmail) //slice: flexible and dynamic in nature
+	bookings = append(bookings, userData)
 }
